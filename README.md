@@ -140,12 +140,3 @@ Notes:
 - `hmax` is approximated with Triangle's maximum-area refinement option. This
   mimics the scalar part of the Julia `TriMeshGen.jl` helper, but not its
   callback-based spatial size function yet.
-
-## GitHub
-
-After creating an empty private repository named `tri-rl-starter` on GitHub:
-
-```bash
-git remote add origin git@github.com:YOUR_USER/tri-rl-starter.git
-git push -u origin main
-```
