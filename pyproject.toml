@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tri-rl-starter"
+version = "0.1.0"
+description = "Starter utilities for triangular mesh improvement RL experiments"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "triangle",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tri_rl_starter*"]
