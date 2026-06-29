@@ -95,11 +95,12 @@ def _ideal_degrees(points, triangles, boundary_nodes,
 def _minimum_degrees(points, triangles, boundary_nodes, angle_tol=5.0):
     angles = _angle_sums(points, triangles) * 180.0 / np.pi
     minimum = np.full(len(points), 3, dtype=int)
+    max_angle = 180.0 - float(angle_tol)
     for node in np.asarray(boundary_nodes, dtype=int):
         theta = angles[node]
-        if theta < 120.0 - float(angle_tol):
+        if theta < max_angle:
             minimum[node] = 2
-        elif theta < 240.0 - float(angle_tol):
+        elif theta < 2.0 * max_angle:
             minimum[node] = 3
         else:
             minimum[node] = 4
