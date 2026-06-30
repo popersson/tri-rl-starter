@@ -121,7 +121,8 @@ class TriMesh:
     minimum_degrees: np.ndarray
 
     def __init__(self, points, triangles, boundary_edges,
-                 corner_nodes=None, round_boundary=True, angle_tol=5.0):
+                 corner_nodes=None, round_boundary=True, angle_tol=5.0,
+                 ideal_degrees=None, minimum_degrees=None):
         self.points = np.asarray(points, dtype=float).copy()
         self.triangles = orient_triangles_ccw(
             self.points, np.asarray(triangles, dtype=int))
@@ -141,12 +142,23 @@ class TriMesh:
                 for node in edge
             ]).astype(int)
 
-        self.ideal_degrees = _ideal_degrees(
-            self.points, self.triangles, self.boundary_nodes,
-            round_boundary=round_boundary)
-        self.minimum_degrees = _minimum_degrees(
-            self.points, self.triangles, self.boundary_nodes,
-            angle_tol=angle_tol)
+        if ideal_degrees is None:
+            self.ideal_degrees = _ideal_degrees(
+                self.points, self.triangles, self.boundary_nodes,
+                round_boundary=round_boundary)
+        else:
+            self.ideal_degrees = np.asarray(ideal_degrees, dtype=float).copy()
+            if len(self.ideal_degrees) != len(self.points):
+                raise ValueError("ideal_degrees must have one value per point")
+
+        if minimum_degrees is None:
+            self.minimum_degrees = _minimum_degrees(
+                self.points, self.triangles, self.boundary_nodes,
+                angle_tol=angle_tol)
+        else:
+            self.minimum_degrees = np.asarray(minimum_degrees, dtype=int).copy()
+            if len(self.minimum_degrees) != len(self.points):
+                raise ValueError("minimum_degrees must have one value per point")
 
     @property
     def npoints(self):
@@ -181,6 +193,19 @@ class TriMesh:
             self.triangles,
             self.boundary_edges,
             corner_nodes=self.corner_nodes)
+
+    def with_triangles(self, triangles, preserve_degree_targets=True):
+        """Return a mesh with identical vertices and new triangle connectivity."""
+        kwargs = {}
+        if preserve_degree_targets:
+            kwargs["ideal_degrees"] = self.ideal_degrees
+            kwargs["minimum_degrees"] = self.minimum_degrees
+        return type(self)(
+            self.points,
+            triangles,
+            self.boundary_edges,
+            corner_nodes=self.corner_nodes,
+            **kwargs)
 
     def smoothed(self, iterations=10, omega=0.5, check_inversion=True):
         """Return a simply smoothed copy of this mesh."""

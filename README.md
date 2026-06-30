@@ -95,6 +95,50 @@ plot_mesh(smoothed)
 The smoother uniformly spaces non-corner boundary nodes along each polygon side
 and applies a few graph-Laplacian steps to interior nodes.
 
+## Topology-Only Flip Environment
+
+The package also includes a graph-only edge-flip environment for the first RL
+experiments. It keeps the game discrete: actions are no-op or a valid interior
+edge flip, rewards are degree-L1 improvements, and geometric inversion/quality
+checks are deliberately not part of the v1 action validity.
+
+```python
+from tri_rl_starter.env import MeshCaseConfig, TriFlipEnv
+
+env = TriFlipEnv(
+    mesh_config=MeshCaseConfig(
+        case="random_polygon",
+        seed=1,
+        hmax=0.35,
+    )
+)
+obs, info = env.reset()
+
+# Action 0 is no-op. Action k + 1 flips obs.candidate_edges[k].
+obs, reward, terminated, truncated, info = env.step(1)
+```
+
+The node feature matrix intentionally contains only topology/degree data:
+degree, ideal degree, signed and absolute degree error, boundary/corner flags,
+minimum degree, and minimum-degree deficit. Normalized coordinates are returned
+separately as observation metadata for plotting and future quality-based
+experiments, but they are not part of the default node features.
+
+Quick non-learning baselines:
+
+```bash
+python -m tri_rl_starter.flip_baseline --policy greedy --seed 1 --hmax 0.35
+python -m tri_rl_starter.flip_baseline --policy random --seed 1 --hmax 0.35
+```
+
+To visually compare the rollout start and the smoothed final mesh in separate
+Matplotlib windows:
+
+```bash
+python -m tri_rl_starter.flip_baseline --policy greedy --seed 1 --hmax 0.35 \
+    --plot-initial --plot-final-smoothed --plot-block
+```
+
 `plot_mesh` reuses the current Matplotlib figure by default and calls
 `show(block=False)`, so repeated calls should update the existing window in
 IPython. If you want a blocking script-style plot, use:
